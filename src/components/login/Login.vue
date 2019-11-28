@@ -12,7 +12,7 @@
       <el-form-item label="密码">
         <el-input v-model="formData.password" type="password"></el-input>
       </el-form-item>
-      <el-button class="login-btn" type="primary" @click="handleLogin">登录</el-button>
+      <el-button class="login-btn" type="primary" native-type="submit" @click="handleLogin">登录</el-button>
     </el-form>
   </div>
 </template>
@@ -41,7 +41,7 @@
           if (status === 200) {
             // 登录成功
             // 1. 跳转home
-            this.$router.push({name: 'home'})
+            this.$router.push({name: 'Home'})
             // 2. 提示成功
             this.$message.success(msg)
             console.log(data)
