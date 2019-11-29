@@ -11,8 +11,8 @@
               <h3>电商后台管理系统</h3>
             </el-col>
             <el-col :span="2">
-              <div class="grid-content bg-purple">
-                <a href="#" class="logout" @click.prevent="handleLogout">退出</a>
+              <div class="grid-content bg-purple" style="line-height: 60px;">
+                <el-button type="info" @click="handleLogout">退出</el-button>
               </div>
             </el-col>
           </el-row>
@@ -150,10 +150,5 @@
   /*头部样式*/
   .middle {
     text-align: center;
-  }
-
-  .logout {
-    text-decoration: none;
-    line-height: 60px;
   }
 </style>
