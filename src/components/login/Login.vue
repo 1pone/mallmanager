@@ -52,7 +52,6 @@
           this.$router.push({name: 'Home'})
           // 2. 提示成功
           this.$message.success(msg)
-          console.log(data)
         } else {
           // 登录失败
           // 提示错误信息

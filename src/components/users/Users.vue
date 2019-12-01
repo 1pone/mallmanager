@@ -29,6 +29,7 @@
       <el-row>
         <el-table
           :data="userList"
+          v-loading="loading"
           border
           style="width: 100%">
           <el-table-column
@@ -49,7 +50,7 @@
           <el-table-column
             prop="mobile"
             label="电话"
-            min-width="110px">
+            min-width="120px">
           </el-table-column>
           <el-table-column
             prop="role_name"
@@ -64,7 +65,7 @@
 <!--            slot-scope的值userList就是el-table绑定的值userList slot-scope会自动使用上一级绑定数据-->
 <!--            userList.row -> 数组中的每一个对象-->
             <template slot-scope="scope">
-              {{scope.row.create_time | fmtdate}}
+              {{scope.row.create_time*1000 | fmtdate}}
             </template>
           </el-table-column>
           <el-table-column
@@ -73,18 +74,19 @@
             <template slot-scope="scope">
               <el-switch
                 v-model="scope.row.mg_state"
+                @change="editState(scope.row.id, scope.row.mg_state)"
                 active-color="#13ce66"
-                inactive-color="#ff4949">
+                inactive-color="#F56C6C">
               </el-switch>
             </template>
           </el-table-column>
           <el-table-column
-            label="操作"
-            min-width="148px">
-            <template>
-              <el-button type="primary" icon="el-icon-edit" size="small" plain circle></el-button>
-              <el-button type="warning" icon="el-icon-setting" size="small" plain circle></el-button>
-              <el-button type="danger" icon="el-icon-delete" size="small" plain circle></el-button>
+            label="操作: 修改信息/分配角色/删除用户"
+            min-width="248px">
+            <template slot-scope="scope">
+              <el-button type="primary" icon="el-icon-edit" size="small" circle @click="selectedUser = scope.row , dialogEditVisible = true"></el-button>
+              <el-button type="warning" icon="el-icon-setting" size="small" circle></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delUser(scope.row.id)"></el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -102,27 +104,45 @@
         </el-pagination>
       </el-row>
 <!--      添加用户对话框表单-->
-      <el-dialog title="添加用户" :visible.sync="dialogFormVisible" @close="dialogClose('form')">
-        <el-form :model="form" :rules="rules" ref="form" status-icon>
+      <el-dialog title="添加用户" :visible.sync="dialogFormVisible" @close="dialogClose('addForm')">
+        <el-form :model="addForm" :rules="rules" ref="addForm" status-icon>
           <el-form-item label="用户名" prop="username" :label-width="labelWidth">
-            <el-input v-model="form.username"></el-input>
+            <el-input v-model="addForm.username"></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="password" :label-width="labelWidth">
-            <el-input v-model="form.password" type="password"></el-input>
+            <el-input v-model="addForm.password" type="password"></el-input>
           </el-form-item>
           <el-form-item label="确认密码" prop="passwordConfirm" :label-width="labelWidth">
-            <el-input v-model="form.passwordConfirm" type="password"></el-input>
+            <el-input v-model="addForm.passwordConfirm" type="password"></el-input>
           </el-form-item>
           <el-form-item label="邮箱" prop="email" :label-width="labelWidth">
-            <el-input v-model="form.email"></el-input>
+            <el-input v-model="addForm.email"></el-input>
           </el-form-item>
           <el-form-item label="手机号" prop="mobile" :label-width="labelWidth">
-            <el-input v-model="form.mobile"></el-input>
+            <el-input v-model="addForm.mobile"></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogClose('form')">取 消</el-button>
-          <el-button type="primary" @click="submitForm('form')">确 定</el-button>
+          <el-button @click="dialogClose('addForm')">取 消</el-button>
+          <el-button type="primary" @click="addUser('addForm')">确 定</el-button>
+        </div>
+      </el-dialog>
+<!--      修改用户信息框表单-->
+      <el-dialog title="修改用户信息" :visible.sync="dialogEditVisible" @close="dialogClose('editForm')">
+        <el-form :model="selectedUser" :rules="rules" ref="editForm" status-icon>
+          <el-form-item label="用户名" :label-width="labelWidth">
+            <el-input v-model="selectedUser.username" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="邮箱" prop="email" :label-width="labelWidth">
+            <el-input v-model="selectedUser.email"></el-input>
+          </el-form-item>
+          <el-form-item label="手机号" prop="mobile" :label-width="labelWidth">
+            <el-input v-model="selectedUser.mobile"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogClose('editForm')">取 消</el-button>
+          <el-button type="primary" @click="editUser('editForm')">确 定</el-button>
         </div>
       </el-dialog>
     </el-card>
@@ -133,15 +153,15 @@
   export default {
     name: 'Users',
     data () {
-      // 在 data() 中，且 return 之前，自定义一些校验规则
+      // 在 data() 中，且 return 之前，自定义一些表单校验规则
       // 校验密码
       const validatePass = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('请输入密码'))
         } else {
-          if (this.form.passwordConfirm !== '') {
+          if (this.addForm.passwordConfirm !== '') {
             // 当输入密码后密码校验框的值为非空时，立刻执行passwordConfirm字段校验
-            this.$refs.form.validateField('passwordConfirm') // validateField() 对部分表单字段进行校验的方法
+            this.$refs.addForm.validateField('passwordConfirm') // validateField() 对部分表单字段进行校验的方法
           }
           // 校验通过
           callback()
@@ -152,7 +172,7 @@
       const validatePass2 = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('请再次输入密码'))
-        } else if (value !== this.form.password) {
+        } else if (value !== this.addForm.password) {
           callback(new Error('两次输入密码不一致!'))
         } else {
           callback()
@@ -181,6 +201,7 @@
         userList: [], // 用户列表
         // 对话框表单
         dialogFormVisible: false,
+        loading: false,
         labelWidth: '120px',
         // 添加用户表单请求参数
         // 参数名 参数说明 备注
@@ -188,13 +209,14 @@
         // password 用户密码 不能为空
         // email 邮箱 可以为空
         // mobile 手机号 可以为空
-        form: {
+        addForm: {
           username: '',
           password: '',
           passwordConfirm: '',
           email: '',
           mobile: ''
         },
+        submitDisable: false, // 防止连续点击表单数据重复提交
         // 表单规则
         rules: {
           username: [
@@ -217,6 +239,9 @@
             { validator: checkMobile, trigger: 'blur' }
           ]
         },
+        // 编辑的表单数据
+        dialogEditVisible: false,
+        selectedUser: {},
         // 分页相关数据
         pageNum: 1, //
         pageSize: 2, // 每页数据条数
@@ -230,6 +255,7 @@
     methods: {
       // 获取用户数据列表
       async getUserList () {
+        this.loading = true // 表格加载动效
         // 参数名 参数说明 备注
         // query 查询参数 可以为空
         // pagenum 当前页码 不能为空
@@ -238,62 +264,109 @@
         const AUTH_TOKEN = localStorage.getItem('token') // 从localStorage获取token
         this.$http.defaults.headers.Authorization = AUTH_TOKEN // 设置请求头
         const res = await this.$http.get(`users?query=${this.query}&pagenum=${this.pageNum}&pagesize=${this.pageSize}`)
-        const {data: {total, users}, meta: {msg, status}} = res.data
+        const {meta: {msg, status}} = res.data
         if (status === 200) {
+          const {data: {total, users}} = res.data
+          this.loading = false
           // 给表格数据赋值
           this.userList = users
           // 给total赋值
           this.total = total
           // 提示
           this.$message.success(msg)
-          console.log(res)
         } else {
-          this.$message.error(msg)
+          this.$message.error(`${status} : ${msg}`)
         }
       },
 
       // 关闭添加用户对话框
       dialogClose (formName) {
         this.dialogFormVisible = false
+        this.dialogEditVisible = false
         this.$refs[formName].resetFields()
         // 清空表单数据
         // 方法一 直接赋值空对象，在input时重新创建对象
-        // this.form = {}
+        // this.addForm = {}
         // 方法二 遍历清空数组
-        // for (let key in this.form) {
-        //   if (this.form.hasOwnProperty(key)) {
-        //     this.form[key] = ''
+        // for (let key in this.addForm) {
+        //   if (this.addForm.hasOwnProperty(key)) {
+        //     this.addForm[key] = ''
         //   }
         // }
         // 方法三 重新赋值
-        // this.form = {username: '', password: '', email: '', mobile: ''}
-        // 方法四 this.$refs[formName].resetFields()
+        // this.addForm = {username: '', password: '', email: '', mobile: ''}
+        // 方法四 this.$refs[addFormName].resetFields()
       },
 
       // 添加用户
-      async addUser (formName) {
-        const res = await this.$http.post('/users', this.form)
-        const {data, meta: {msg, status}} = res.data
-        if (status === 201) {
-          console.log(data)
-          this.getUserList()
-          this.$message.success(msg)
-        } else {
-          this.$message.error(msg)
-        }
-        this.dialogClose(formName)
+      addUser (formName) {
+        this.$refs[formName].validate(async (valid) => {
+          if (valid) {
+            if (!this.submitDisable) { // 防止数据重复提交
+              this.submitDisable = true
+              const res = await this.$http.post('/users', this.addForm)
+              const {meta: {msg, status}} = res.data
+              if (status === 201) {
+                this.getUserList()
+                this.$message.success(msg)
+              } else {
+                this.$message.error(`${status} : ${msg}`)
+              }
+              this.dialogClose(formName)
+            }
+          }
+          setTimeout(() => {
+            this.submitDisable = false
+          }, 3000) // 锁定提交3s防止数据重复提交
+        })
       },
 
-      // 表单确认
-      submitForm (formName) {
-        this.$refs[formName].validate(valid => {
+      // 修改用户信息
+      editUser (formName) {
+        this.$refs[formName].validate(async (valid) => {
           if (valid) {
-            this.addUser(formName)
-            console.log('submit!')
-          } else {
-            console.log('error submit!')
-            return false
+            this.dialogEditVisible = true
+            const res = await this.$http.put(`/users/${this.selectedUser.id}`, this.selectedUser)
+            const {meta: {msg, status}} = res.data
+            if (status === 200) {
+              this.getUserList()
+              this.$message.success(msg)
+            } else {
+              this.$message.error(`${status} : ${msg}`)
+            }
+            this.dialogClose(formName)
           }
+        })
+      },
+
+      // 修改用户状态
+      async editState (id, state) {
+        const res = await this.$http.put(`users/${id}/state/${state}`)
+        const {meta: {msg, status}} = res.data
+        if (status === 200) {
+          this.getUserList()
+          this.$message.success(msg)
+        }
+      },
+
+      // 删除用户
+      delUser (id) {
+        this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          const res = await this.$http.delete(`users/${id}`)
+          const {meta: {msg, status}} = res.data
+          if (status === 200) {
+            this.$message.success(msg)
+            console.log('删除成功!')
+            this.getUserList()
+          } else {
+            this.$message.error(msg)
+          }
+        }).catch(() => {
+          this.$message.info('已取消删除')
         })
       },
 
