@@ -31,6 +31,7 @@
           :data="userList"
           v-loading="loading"
           border
+          height= "400px"
           style="width: 100%">
           <el-table-column
             type="index"
@@ -81,8 +82,8 @@
             </template>
           </el-table-column>
           <el-table-column
-            label="操作: 修改信息/分配角色/删除用户"
-            min-width="248px">
+            label="操作"
+            min-width="148px">
             <template slot-scope="scope">
               <el-button type="primary" icon="el-icon-edit" size="small" circle @click="selectedUser = scope.row , dialogEditVisible = true"></el-button>
               <el-button type="warning" icon="el-icon-setting" size="small" circle @click="getRoleList(scope.row)"></el-button>
