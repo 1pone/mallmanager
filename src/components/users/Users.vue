@@ -1,7 +1,5 @@
 <template>
   <div>
-<!--    卡片容器-->
-    <el-card class="box-card" shadow="never">
       <el-row>
 <!--      1. 面包屑-->
 <!--      1.1 首页 > 用户管理 > 用户列表-->
@@ -11,6 +9,8 @@
           <el-breadcrumb-item>用户列表</el-breadcrumb-item>
         </el-breadcrumb>
       </el-row>
+<!--    卡片容器-->
+    <el-card class="box-card" shadow="never">
 <!--      2. 搜索框-->
       <el-row style="margin-top: 15px" :gutter="20">
         <el-col>
@@ -31,6 +31,7 @@
           :data="userList"
           v-loading="loading"
           border
+          stripe
           height= "400px"
           style="width: 100%">
           <el-table-column
@@ -274,8 +275,8 @@
         selectedValue: '',
         // 分页相关数据
         pageNum: 1, //
-        pageSize: 2, // 每页数据条数
-        page_sizes: [2, 4, 6, 8], // 数据条数集合
+        pageSize: 4, // 每页数据条数
+        page_sizes: [4, 8, 12], // 数据条数集合
         total: 0 // 数据总条数
       }
     },
@@ -397,7 +398,7 @@
 
       // 分配用户角色
       async setUserRole () {
-        const res = await this.$http.put(`users/${this.selectedUser.id}/role`,{rid: this.selectedValue})
+        const res = await this.$http.put(`users/${this.selectedUser.id}/role`, {rid: this.selectedValue})
         const {meta: {msg, status}} = res.data
         if (status === 200) {
           this.$message.success(msg)
