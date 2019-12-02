@@ -85,7 +85,7 @@
             min-width="248px">
             <template slot-scope="scope">
               <el-button type="primary" icon="el-icon-edit" size="small" circle @click="selectedUser = scope.row , dialogEditVisible = true"></el-button>
-              <el-button type="warning" icon="el-icon-setting" size="small" circle></el-button>
+              <el-button type="warning" icon="el-icon-setting" size="small" circle @click="getRoleList(scope.row)"></el-button>
               <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delUser(scope.row.id)"></el-button>
             </template>
           </el-table-column>
@@ -143,6 +143,31 @@
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogClose('editForm')">取 消</el-button>
           <el-button type="primary" @click="editUser('editForm')">确 定</el-button>
+        </div>
+      </el-dialog>
+<!--      分配用户角色框表单，添加选择框及方法-->
+      <el-dialog title="分配角色" :visible.sync="dialogRoleVisible" @close="dialogClose">
+        <el-form :model="selectedUser" :rules="rules" ref="editForm" status-icon>
+          <el-form-item label="当前用户" :label-width="labelWidth">
+            <span style="padding: 0px 15px">{{selectedUser.username}}</span>
+          </el-form-item>
+          <el-form-item label="当前角色" :label-width="labelWidth">
+            <span style="padding: 0px 15px">{{selectedUser.role_name}}</span>
+          </el-form-item>
+          <el-form-item label="新分配的角色" :label-width="labelWidth">
+            <el-select v-model="selectedValue" placeholder="请选择">
+              <el-option
+                v-for="item in roleList"
+                :key="item.id"
+                :label="item.roleName"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogClose">取 消</el-button>
+          <el-button type="primary" @click="setUserRole">确 定</el-button>
         </div>
       </el-dialog>
     </el-card>
@@ -239,9 +264,13 @@
             { validator: checkMobile, trigger: 'blur' }
           ]
         },
-        // 编辑的表单数据
+        // 用户编辑的表单数据
         dialogEditVisible: false,
-        selectedUser: {},
+        selectedUser: {}, // 编辑用户和角色分配共用
+        // 角色分配
+        dialogRoleVisible: false,
+        roleList: [],
+        selectedValue: '',
         // 分页相关数据
         pageNum: 1, //
         pageSize: 2, // 每页数据条数
@@ -279,11 +308,16 @@
         }
       },
 
-      // 关闭添加用户对话框
+      // 关闭添加对话框(添加用户、编辑用户、分配权限共用)
       dialogClose (formName) {
         this.dialogFormVisible = false
         this.dialogEditVisible = false
-        this.$refs[formName].resetFields()
+        this.dialogRoleVisible = false
+        if (typeof formName !== 'undefined' && typeof formName !== 'object') { // 分配权限无传参
+          this.$refs[formName].resetFields() // 清空添加用户、编辑用户表单数据
+        } else {
+          this.selectedValue = '' // 清空选择器value
+        }
         // 清空表单数据
         // 方法一 直接赋值空对象，在input时重新创建对象
         // this.addForm = {}
@@ -349,8 +383,33 @@
         }
       },
 
+      // 获取用户角色列表
+      async getRoleList (selectedUser) {
+        this.selectedUser = selectedUser
+        this.dialogRoleVisible = true
+        const res = await this.$http.get('roles')
+        const {meta: {status}} = res.data
+        if (status === 200) {
+          this.roleList = res.data.data
+        }
+      },
+
+      // 分配用户角色
+      async setUserRole () {
+        const res = await this.$http.put(`users/${this.selectedUser.id}/role`,{rid: this.selectedValue})
+        const {meta: {msg, status}} = res.data
+        if (status === 200) {
+          this.$message.success(msg)
+        } else {
+          this.$message.error(msg)
+        }
+        this.dialogClose()
+        this.getUserList()
+      },
+
       // 删除用户
       delUser (id) {
+        // 此处采用MessageBox弹框，也可使用更轻量的Popover嵌套弹出框或者Popconfirm气泡确认框
         this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
