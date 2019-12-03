@@ -5,6 +5,7 @@ import Home from '@/components/home/Home'
 import Users from '@/components/users/Users'
 import Right from '@/components/power/Right'
 import Role from '@/components/power/Role'
+
 Vue.use(Router)
 
 export default new Router({
