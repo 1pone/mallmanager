@@ -40,9 +40,23 @@
           stripe
           style="width: 100%; margin-bottom: 20px">
           <el-table-column
-            type="expend"
+            type="expand"
             width="40">
-            <template slot-scope="scope"></template>
+            <template slot-scope="scope">
+              <el-table label-position="left" inline class="demo-table-expand" data="scope.row.children">
+                <el-table-column
+                prop="authName"
+                width="180">
+                </el-table-column>
+                <el-table-column
+                  prop="name"
+                  width="180">
+                </el-table-column>
+                <el-table-column
+                  prop="address">
+                </el-table-column>
+              </el-table>
+            </template>
           </el-table-column>
           <el-table-column
             type="index"
@@ -125,8 +139,6 @@
       // 获取角色列表
       async getRoleList () {
         this.loading = true
-        const AUTH_TOKEN = localStorage.getItem('token') // 从localStorage获取token
-        this.$http.defaults.headers.Authorization = AUTH_TOKEN // 设置请求头
         const res = await this.$http.get('roles')
         const {meta: {msg, status}} = res.data
         if (status === 200) {
