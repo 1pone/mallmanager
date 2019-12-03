@@ -62,7 +62,6 @@
     },
     mounted () {
       this.getRightList('list')
-      console.log(this.numToStr(1))
     },
     methods: {
       // 获取权限列表

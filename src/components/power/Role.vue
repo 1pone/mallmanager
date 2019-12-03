@@ -11,7 +11,7 @@
     </el-row>
     <!--    卡片容器-->
     <el-card class="box-card" shadow="always">
-      <el-row>
+      <el-row style="margin-bottom: 20px">
 <!--        2. 添加角色-->
         <el-button type="primary" @click="dialogAddVisible=true">添加角色</el-button>
         <el-tag type="info" style="float: right;margin: 4px auto">共 {{roleList.length}} 条</el-tag>
@@ -36,26 +36,37 @@
           :data="roleList"
           v-loading="loading"
           height="500"
-          border
           stripe
           style="width: 100%; margin-bottom: 20px">
           <el-table-column
             type="expand"
             width="40">
             <template slot-scope="scope">
-              <el-table label-position="left" inline class="demo-table-expand" data="scope.row.children">
-                <el-table-column
-                prop="authName"
-                width="180">
-                </el-table-column>
-                <el-table-column
-                  prop="name"
-                  width="180">
-                </el-table-column>
-                <el-table-column
-                  prop="address">
-                </el-table-column>
-              </el-table>
+              <el-row v-for="(item1, i) in scope.row.children" :key="i">
+                <el-col :span="4">
+<!--                  一级权限标签-->
+                  <el-tag closable @close="DelRight(scope,item1.id)">{{item1.authName}}</el-tag><i class="el-icon-arrow-right"></i>
+                </el-col>
+                <el-col :span="20">
+                  <el-row v-for="(item2, j) in item1.children" :key="j">
+                    <el-col :span="5">
+<!--                      二级权限标签-->
+                      <el-tag type="success" closable @close="DelRight(scope,item2.id)">{{item2.authName}}</el-tag>
+                      <i class="el-icon-arrow-right"></i>
+                    </el-col>
+                    <el-col :span="19">
+<!--                      三级权限标签-->
+                      <el-tag type="warning"
+                              closable v-for="(item3, k) in item2.children"
+                              :key="k"
+                              style="margin: 2px"
+                              @close="DelRight(scope,item3.id)">{{item3.authName}}</el-tag>
+                    </el-col>
+                  </el-row>
+                </el-col>
+              </el-row>
+<!--          无权限提示-->
+              <span v-if="scope.row.children.length === 0" style="display: block;text-align: center;color: #909399">未分配权限</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -250,13 +261,23 @@
         }).catch(() => {
           this.$message.info('已取消删除')
         })
+      },
+
+      // 删除角色权限
+      async DelRight (scope, rightId) {
+        console.log(scope)
+        const res = await this.$http.delete(`roles/${scope.row.id}/rights/${rightId}`)
+        const {meta: {msg, status}} = res.data
+        if (status === 200) {
+          this.$message.success(msg)
+          this.roleList[scope.$index].children = res.data.data // 后台返回该角色剩余权限信息，直接赋值给roleList动态渲染表格
+        } else {
+          this.$message.error(`${status} : ${msg}`)
+        }
       }
     }
   }
 </script>
 
 <style scoped>
-  .el-row {
-    margin-bottom: 20px;
-  }
 </style>
