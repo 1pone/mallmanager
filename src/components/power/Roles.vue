@@ -44,18 +44,18 @@
             width="1">
             <template slot-scope="scope">
               <el-row v-for="(item1, i) in scope.row.children" :key="i" :class="['borderBottom', i === 0 ? 'borderTop' : '']">
-                <el-col :span="4">
+                <el-col :span="6" style="min-width: 110px">
 <!--                  一级权限标签-->
                   <el-tag closable @close="DelRight(scope,item1.id)">{{item1.authName}}</el-tag><i class="el-icon-arrow-right"></i>
                 </el-col>
-                <el-col :span="20">
+                <el-col :span="18">
                   <el-row v-for="(item2, j) in item1.children" :key="j" :class="j === 0 ? '' : 'borderTop'">
-                    <el-col :span="5">
+                    <el-col :span="8" style="min-width: 110px">
 <!--                      二级权限标签-->
                       <el-tag type="success" closable @close="DelRight(scope,item2.id)">{{item2.authName}}</el-tag>
                       <i class="el-icon-arrow-right"></i>
                     </el-col>
-                    <el-col :span="19">
+                    <el-col :span="16" style="min-width: 200px">
 <!--                      三级权限标签-->
                       <el-tag type="warning"
                               closable v-for="(item3, k) in item2.children"
@@ -90,8 +90,8 @@
             align="center"
             min-width="148px">
             <template slot-scope="scope">
-              <el-button type="primary" icon="el-icon-info" size="small" circle @click="toogleExpand(scope.row)"></el-button>
               <el-button type="primary" icon="el-icon-edit" size="small" circle @click="dialogOpen(JSON.parse(JSON.stringify(scope.row)))"></el-button>
+              <el-button type="success" icon="el-icon-info" size="small" circle @click="toogleExpand(scope.row)"></el-button>
               <el-button type="warning" icon="el-icon-setting" size="small" circle @click="getRightList(scope.row)"></el-button>
               <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delRole(scope.row.id)"></el-button>
             </template>

@@ -66,7 +66,7 @@
 <style scoped>
   .login-wrap {
     height: 100%;
-    background-color: #324152;
+    background-color: #2f8189;
     /*弹性盒布局*/
     display: flex;
     justify-content: center;

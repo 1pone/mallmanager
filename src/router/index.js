@@ -4,12 +4,12 @@ import Login from '@/components/login/Login'
 import Home from '@/components/home/Home'
 import Welcome from '@/components/home/Welcome'
 import Users from '@/components/users/Users'
-import Right from '@/components/power/Right'
-import Role from '@/components/power/Role'
+import Rights from '@/components/power/Rights'
+import Roles from '@/components/power/Roles'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       name: 'Login',
@@ -31,15 +31,36 @@ export default new Router({
           path: '/users',
           component: Users
         }, {
-          name: 'Right',
-          path: '/right',
-          component: Right
+          name: 'Rights',
+          path: '/rights',
+          component: Rights
         }, {
-          name: 'Role',
-          path: '/role',
-          component: Role
+          name: 'Roles',
+          path: '/roles',
+          component: Roles
         }
       ]
     }
   ]
 })
+
+// 路由导航守卫，在路由生效前执行，统一判断token
+// to -> 要去的路由配置
+// from -> 当前的路由配置
+// next -> 继续执行
+router.beforeEach((to, from, next) => {
+  if (to.path === '/login') {
+    next()
+  } else {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      // 没有token，跳转login页面
+      router.push({name: 'Login'})
+    } else {
+      next()
+    }
+    //  有token 继续渲染页面
+  }
+})
+
+export default router
