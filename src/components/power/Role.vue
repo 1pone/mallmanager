@@ -34,21 +34,22 @@
 <!--        表格-->
         <el-table
           :data="roleList"
-          v-loading="loading"
-          height="500"
+          v-loading="loadingTable"
           stripe
+          ref="table"
+          height="500"
           style="width: 100%; margin-bottom: 20px">
           <el-table-column
             type="expand"
-            width="40">
+            width="1">
             <template slot-scope="scope">
-              <el-row v-for="(item1, i) in scope.row.children" :key="i">
+              <el-row v-for="(item1, i) in scope.row.children" :key="i" :class="['borderBottom', i === 0 ? 'borderTop' : '']">
                 <el-col :span="4">
 <!--                  一级权限标签-->
                   <el-tag closable @close="DelRight(scope,item1.id)">{{item1.authName}}</el-tag><i class="el-icon-arrow-right"></i>
                 </el-col>
                 <el-col :span="20">
-                  <el-row v-for="(item2, j) in item1.children" :key="j">
+                  <el-row v-for="(item2, j) in item1.children" :key="j" :class="j === 0 ? '' : 'borderTop'">
                     <el-col :span="5">
 <!--                      二级权限标签-->
                       <el-tag type="success" closable @close="DelRight(scope,item2.id)">{{item2.authName}}</el-tag>
@@ -59,7 +60,6 @@
                       <el-tag type="warning"
                               closable v-for="(item3, k) in item2.children"
                               :key="k"
-                              style="margin: 2px"
                               @close="DelRight(scope,item3.id)">{{item3.authName}}</el-tag>
                     </el-col>
                   </el-row>
@@ -90,8 +90,9 @@
             align="center"
             min-width="148px">
             <template slot-scope="scope">
+              <el-button type="primary" icon="el-icon-info" size="small" circle @click="toogleExpand(scope.row)"></el-button>
               <el-button type="primary" icon="el-icon-edit" size="small" circle @click="dialogOpen(JSON.parse(JSON.stringify(scope.row)))"></el-button>
-              <el-button type="warning" icon="el-icon-setting" size="small" circle @click="getRoleList(scope.row)"></el-button>
+              <el-button type="warning" icon="el-icon-setting" size="small" circle @click="getRightList(scope.row)"></el-button>
               <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delRole(scope.row.id)"></el-button>
             </template>
           </el-table-column>
@@ -112,6 +113,24 @@
           <el-button type="primary" @click="editRole('formEdit')">确 定</el-button>
         </div>
       </el-dialog>
+<!--      分配权限-->
+      <el-dialog title="分配权限" :visible.sync="dialogRightVisible" @close="dialogRightClose">
+        <el-tree
+          :data="rightList"
+          v-loading="loadingTree"
+          show-checkbox
+          default-expand-all
+          :default-checked-keys="arrChecked"
+          node-key="id"
+          ref="tree"
+          highlight-current
+          :props="defaultProps">
+        </el-tree>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogRightClose">取 消</el-button>
+          <el-button type="primary" @click="editRight">确 定</el-button>
+        </div>
+      </el-dialog>
     </el-card>
     </div>
 </template>
@@ -123,10 +142,11 @@
       return {
         dialogAddVisible: false,
         dialogEditVisible: false,
-        loading: false,
+        dialogRightVisible: false,
+        loadingTable: false,
+        loadingTree: false,
         formLabelWidth: '120px',
         roleList: [],
-        selectedRole: {},
         submitDisable: false,
         form: {
           roleName: '',
@@ -140,6 +160,14 @@
           roleDesc: [
             { max: 20, message: '长度不超过 20 个字符', trigger: 'blur' }
           ]
+        },
+        // 权限分配
+        rightList: [],
+        arrChecked: [],
+        roleChecked: {},
+        defaultProps: {
+          children: 'children',
+          label: 'authName'
         }
       }
     },
@@ -149,11 +177,11 @@
     methods: {
       // 获取角色列表
       async getRoleList () {
-        this.loading = true
+        this.loadingTable = true
         const res = await this.$http.get('roles')
         const {meta: {msg, status}} = res.data
         if (status === 200) {
-          this.loading = false
+          this.loadingTable = false
           this.roleList = res.data.data
           // this.$message.success(msg)
         } else {
@@ -237,11 +265,54 @@
         })
       },
 
-      // 关闭编辑角色对话框(使用resetFields()有问题，重置后的数据为第一次点击后的数据而不是空数据)
-      // dialogEditClose () {
-      //   this.dialogEditVisible = false
-      //   this.form = { roleName: '', roleDesc: '' }
-      // },
+      // 获取权限列表
+      async getRightList (role) {
+        this.dialogRightVisible = true
+        this.loadingTree = true
+        this.roleChecked.id = role.id
+        const res = await this.$http.get(`rights/tree`)
+        const {meta: {msg, status}} = res.data
+        if (status === 200) {
+          this.rightList = res.data.data
+          let arrTemp = []
+          role.children.forEach(item1 => {
+            // arrTemp.push(item1.id)
+            item1.children.forEach(item2 => {
+              // arrTemp.push(item2.id)
+              item2.children.forEach(item3 => {
+                arrTemp.push(item3.id)
+              })
+            })
+          })
+          this.arrChecked = arrTemp
+          this.loadingTree = false
+          // this.$message.success(msg)
+        } else {
+          this.$message.error(`${status} : ${msg}`)
+        }
+      },
+
+      // 关闭权限分配对话框
+      dialogRightClose () {
+        this.dialogRightVisible = false
+        this.arrChecked = []
+        this.roleChecked = {}
+      },
+
+      // 提交角色新权限
+      async editRight () {
+        this.arrChecked = this.$refs.tree.getCheckedKeys()
+        this.arrChecked.push(...this.$refs.tree.getHalfCheckedKeys())
+        const res = await this.$http.post(`roles/${this.roleChecked.id}/rights`, {rids: this.arrChecked.join(',')})
+        const {meta: {msg, status}} = res.data
+        if (status === 200) {
+          this.$message.success(msg)
+          this.getRoleList()
+        } else {
+          this.$message.error(`${status} : ${msg}`)
+        }
+        this.dialogRightClose()
+      },
 
       // 删除角色
       async delRole (id) {
@@ -274,10 +345,32 @@
         } else {
           this.$message.error(`${status} : ${msg}`)
         }
+      },
+
+      // 行展开 手风琴效果
+      toogleExpand (row) {
+        let $table = this.$refs.table
+        this.roleList.map((item) => { // 遍历并关闭所有非当前展开行
+          if (row.id !== item.id) {
+            $table.toggleRowExpansion(item, false)
+          }
+        })
+        $table.toggleRowExpansion(row)
       }
     }
   }
 </script>
 
 <style scoped>
+  .borderBottom {
+    border-bottom: 1px solid #ddd
+  }
+
+  .borderTop {
+    border-top: 1px solid #ddd
+  }
+
+  .el-tag {
+    margin: 5px 5px
+  }
 </style>

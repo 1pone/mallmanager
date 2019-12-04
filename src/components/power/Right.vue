@@ -67,8 +67,6 @@
       // 获取权限列表
       async getRightList (type) {
         this.loading = true
-        const AUTH_TOKEN = localStorage.getItem('token') // 从localStorage获取token
-        this.$http.defaults.headers.Authorization = AUTH_TOKEN // 设置请求头
         const res = await this.$http.get(`rights/${type}`)
         const {meta: {msg, status}} = res.data
         if (status === 200) {

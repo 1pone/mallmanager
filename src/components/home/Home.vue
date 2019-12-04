@@ -2,17 +2,18 @@
       <el-container class="container">
         <el-header class="header">
           <el-row>
-            <el-col :span="4">
+            <el-col :span="6">
               <div class="grid-content bg-purple logo">
                 <img src="@/assets/logo.png" alt="logo" height="60px">
               </div>
             </el-col>
-            <el-col :span="18"  class="middle">
+            <el-col :span="12"  class="middle">
               <h3>电商后台管理系统</h3>
             </el-col>
-            <el-col :span="2">
+            <el-col :span="6">
               <div class="grid-content bg-purple" style="line-height: 60px;">
-                <el-button type="info" @click="handleLogout">退出</el-button>
+                <span style="margin-right: 10px">欢迎您  {{username}}</span>
+                <el-button type="info" size="small" @click="handleLogout">退出</el-button>
               </div>
             </el-col>
           </el-row>
@@ -105,7 +106,9 @@
   export default {
     name: 'Home',
     data () {
-      return {}
+      return {
+        username: ''
+      }
     },
     // 组件渲染之前检查token
     beforeCreate () {
@@ -116,9 +119,13 @@
       }
     //  有token 继续渲染页面
     },
+    mounted () {
+      this.username = localStorage.getItem('username')
+    },
     methods: {
       handleLogout () {
         localStorage.removeItem('token')
+        localStorage.removeItem('username')
         this.$message.success('退出成功')
         this.$router.push({name: 'Login'})
       }
