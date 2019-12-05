@@ -6,7 +6,8 @@ import Welcome from '@/components/home/Welcome'
 import Users from '@/components/users/Users'
 import Rights from '@/components/power/Rights'
 import Roles from '@/components/power/Roles'
-import Goods from '@/components/goods/Goods'
+import GoodsList from '@/components/goods/GoodsList'
+import AddGood from '@/components/goods/AddGood'
 import Params from '@/components/goods/Params'
 import Categories from '@/components/goods/Categories'
 
@@ -42,9 +43,13 @@ const router = new Router({
           path: '/roles',
           component: Roles
         }, {
-          name: 'Goods',
+          name: 'GoodsList',
           path: '/goods',
-          component: Goods
+          component: GoodsList
+        }, {
+          name: 'AddGood',
+          path: '/addGood',
+          component: AddGood
         }, {
           name: 'Params',
           path: '/params',

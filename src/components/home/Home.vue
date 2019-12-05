@@ -8,12 +8,12 @@
               </div>
             </el-col>
             <el-col :span="12"  class="middle">
-              <span style="font-size: 28px;color: #6a9c78;line-height: 60px">电商后台管理系统</span>
+              <span style="font-size: 28px;line-height: 60px">电商后台管理系统</span>
             </el-col>
             <el-col :span="6">
               <div class="grid-content bg-purple" style="line-height: 60px;">
-                <span style="margin-right: 10px;color: #6a9c78">欢迎您  {{username}}</span>
-                <el-button size="small" @click="handleLogout" style="background-color: #6a9c78;color: #fff1bc;border-width: 0">退出</el-button>
+                <span style="margin-right: 10px;">欢迎您  {{username}}</span>
+                <el-button size="small" class="btm-logout" @click="handleLogout" style="background-color: #fff1bc;border-width: 0；color:#6a9c78">退出</el-button>
               </div>
             </el-col>
           </el-row>
@@ -26,12 +26,14 @@
             <el-menu
               unique-opened
               router
+              :default-active="this.$route.path"
               :collapse="isCollapse"
-              style="background-color: #6a9c78;border-right: 0">
+              background-color= "#c4e3cb"
+              style="border-right: 0">
               <el-submenu :index="item1.authName" v-for="(item1, index) in menuList" :key="index" :class="isCollapse ? 'el_submenu_small': 'el_submenu_large'">
                 <template slot="title">
-                  <i :class="iconList[index]" style="color: #FFF1BC"></i>
-                  <span style="color: #FFF1BC">{{item1.authName}}</span>
+                  <i :class="iconList[index]" style="color: #6a9c78"></i>
+                  <span style="color: #6a9c78">{{item1.authName}}</span>
                 </template>
                 <el-menu-item-group style="background-color: #c4e3cb" class="menus">
                   <el-menu-item :index="item2.path" v-for="(item2, index) in item1.children" :key="index">
@@ -130,13 +132,13 @@
 
 <style scoped>
   .header{
-    background-color: #c4e3cb;
-    color: #333;
+    background-color: #6a9c78;
+    color: #fff1bc;
     text-align: center;
   }
 
   .aside {
-    background-color: #6a9c78;
+    background-color: #c4e3cb;
     color: #333;
   }
 
