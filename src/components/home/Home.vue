@@ -13,7 +13,7 @@
             <el-col :span="6">
               <div class="grid-content bg-purple" style="line-height: 60px;">
                 <span style="margin-right: 10px;color: #6a9c78">欢迎您  {{username}}</span>
-                <el-button size="small" @click="handleLogout" style="background-color: #6a9c78;color: #fff1bc">退出</el-button>
+                <el-button size="small" @click="handleLogout" style="background-color: #6a9c78;color: #fff1bc;border-width: 0">退出</el-button>
               </div>
             </el-col>
           </el-row>
@@ -177,7 +177,7 @@
     }
   }
 
-  .el-menu-item.is-active {
+  .el-menu-item .is-active {
     background-color: #6a9c78 !important;
   }
 
