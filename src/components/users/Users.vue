@@ -37,30 +37,36 @@
           <el-table-column
             type="index"
             label="#"
+            align="center"
             min-width="30px">
           </el-table-column>
           <el-table-column
             prop="username"
             label="姓名"
+            align="center"
             min-width="80px">
           </el-table-column>
           <el-table-column
             prop="email"
             label="邮箱"
+            align="center"
             min-width="170px">
           </el-table-column>
           <el-table-column
             prop="mobile"
             label="电话"
+            align="center"
             min-width="120px">
           </el-table-column>
           <el-table-column
             prop="role_name"
             label="角色"
+            align="center"
             min-width="120px">
           </el-table-column>
           <el-table-column
             label="创建时间"
+            align="center"
             min-width="100px">
             <template slot-scope="scope">
               {{scope.row.create_time*1000 | fmtdate}}

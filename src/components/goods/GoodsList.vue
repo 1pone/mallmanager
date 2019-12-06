@@ -37,25 +37,30 @@
           <el-table-column
             type="index"
             label="#"
+            align="center"
             min-width="30px">
           </el-table-column>
           <el-table-column
             prop="goods_name"
             label="商品名称"
-            min-width="240px">
+            align="center"
+            min-width="120px">
           </el-table-column>
           <el-table-column
             prop="goods_price"
             label="商品价格(元)"
+            align="center"
             min-width="120px">
           </el-table-column>
           <el-table-column
             prop="goods_weight"
+            align="center"
             label="商品重量"
             min-width="80px">
           </el-table-column>
           <el-table-column
             label="创建时间"
+            align="center"
             min-width="110px">
             <template slot-scope="scope">
               {{scope.row.add_time * 1000 | fmtdate}}
