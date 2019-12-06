@@ -88,7 +88,7 @@
           <el-table-column
             label="操作"
             align="center"
-            min-width="148px">
+            min-width="200px">
             <template slot-scope="scope">
               <el-button type="primary" icon="el-icon-edit" size="small" circle @click="dialogOpen(JSON.parse(JSON.stringify(scope.row)))"></el-button>
               <el-button type="success" icon="el-icon-info" size="small" circle @click="toogleExpand(scope.row)"></el-button>

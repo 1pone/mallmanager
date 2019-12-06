@@ -67,7 +67,7 @@
             min-width="100px">
             <template slot-scope="scope">
               <el-button type="primary" icon="el-icon-edit" size="small" circle @click="dialogEditVisible = true,selectedUser = JSON.parse(JSON.stringify(scope.row))"></el-button>
-              <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delUser(scope.row.id)"></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delGoods(scope.row.goods_id)"></el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -175,6 +175,26 @@
         } else {
           this.$message.error(`${status} : ${msg}`)
         }
+      },
+
+      // 删除商品
+      delGoods (id) {
+        this.$confirm('此操作将永久删除该商品, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          const res = await this.$http.delete(`goods/${id}`)
+          const {meta: {msg, status}} = res.data
+          if (status === 200) {
+            this.$message.success(msg)
+            this.getGoodsList()
+          } else {
+            this.$message.error(`${status} : ${msg}`)
+          }
+        }).catch(() => {
+          this.$message.info('已取消删除')
+        })
       },
 
       // 列表分页
