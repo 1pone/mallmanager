@@ -29,12 +29,20 @@
             align="center"
             min-width="30px">
           </el-table-column>
-          <el-table-column
+<!--          使用ElTreeGrid插件对展开表增强-->
+          <el-tree-grid
             prop="cat_name"
             label="分类名称"
-            align="center"
-            min-width="160px">
-          </el-table-column>
+            treeKey="cat_id"
+            parentKey="cat_pid"
+            levelKey="cat_level"
+            childKey="children"></el-tree-grid>
+<!--          <el-table-column-->
+<!--            prop="cat_name"-->
+<!--            label="分类名称"-->
+<!--            align="center"-->
+<!--            min-width="160px">-->
+<!--          </el-table-column>-->
           <el-table-column
             prop="goods_price"
             label="是否有效"
@@ -49,7 +57,7 @@
             align="center"
             min-width="100px">
             <template slot-scope="scope">
-              <el-tag :type="tagType[scope.row.level]">等级{{numToStr(scope.row.cat_level)}}</el-tag>
+              <el-tag :type="tagType[scope.row.cat_level]">等级{{numToStr(scope.row.cat_level)}}</el-tag>
             </template>
           </el-table-column>
           <el-table-column
@@ -113,8 +121,12 @@
 </template>
 
 <script>
+  import ElTreeGrid from 'element-tree-grid'
   export default {
     name: 'Goods',
+    components: {
+      ElTreeGrid
+    },
     data () {
       return {
         loading: false,
@@ -168,6 +180,7 @@
         const {meta: {msg, status}} = res.data
         if (status === 200) {
           const {data: {total, result}} = res.data
+          console.log(result)
           this.loading = false
           // 给表格数据赋值
           this.CateList = result
